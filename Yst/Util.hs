@@ -16,7 +16,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 -}
 
-module Yst.Util (stripBlanks, parseAsDate, stripStExt, getStrAttrWithDefault, getStrListWithDefault, fromNString, getDirectoryContentsRecursive, searchPath, errorExit)
+module Yst.Util (stripBlanks, parseAsDate, constructPermalink, stripStExt, getStrAttrWithDefault, getStrListWithDefault, fromNString, getDirectoryContentsRecursive, searchPath, errorExit)
 where
 import Yst.Types
 import System.Exit
@@ -45,6 +45,12 @@ parseAsDate s =
   msum $ map (\fs -> parsetimeWith fs s) formats
    where parsetimeWith = parseTime defaultTimeLocale
          formats = ["%x","%m/%d/%Y", "%D","%F", "%d %b %Y"]
+
+constructPermalink :: (FormatTime t) => String -> String -> t -> String
+constructPermalink style title date = case style of
+                                        "date" -> (formatTime defaultTimeLocale "%Y/%m/%d/" date) ++ title ++ ".html"
+                                        "pretty" -> (formatTime defaultTimeLocale "%Y/%m/%d/" date) ++ title ++ "/index.html"
+                                        _ -> error "Unsupported permalink style"
 
 stripStExt :: FilePath -> FilePath
 stripStExt f =

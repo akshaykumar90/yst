@@ -80,15 +80,28 @@ processPage xs =
                               Just (NList fs)  -> map getStrAttr fs
                               Just (NString f) -> [f]
                               Just _           -> error "'requires' must be scalar or list"
-       , pageUrl      = url
-       , pageTitle    = getStrAttrWithDefault "title" (dropExtension url) xs
+       , pageUrl      = case (url, permalinkUrl) of
+                             (Just simpleUrl, _) -> fromNString simpleUrl
+                             (Nothing, Just pUrl) -> pUrl
+                             (Nothing, Nothing) -> error "No 'url' or 'permalink' found for page"
+       , pageTitle    = title
        , pageInMenu   = (map toLower $ getStrAttrWithDefault "inmenu" "yes" xs) `notElem`
                           ["no","false"]
        }
     where getPageField f = case (fmap fromNString $ lookup f xs) of
                              Just s  -> s
                              Nothing -> error $ "Missing required " ++ f ++ " field in page definition"
-          url = getPageField "url"
+          title = getPageField "title"
+          url = lookup "url" xs
+          permalink = lookup "permalink" xs
+          date = case lookup "date" xs of
+                   Nothing -> Nothing
+                   Just (NDate d) -> Just d
+                   Just _ -> error "'date' must be specified in a valid format"
+          permalinkUrl = case (permalink, date) of
+                              (Nothing, _)       -> Nothing
+                              (Just _, Nothing)  -> error "Missing required 'date' field for permalinks"
+                              (Just f, Just d)   -> Just $ constructPermalink (fromNString f) title d
           getStrAttr (NString s) = s
           getStrAttr x           = error $ "expected string, got " ++ show x
 

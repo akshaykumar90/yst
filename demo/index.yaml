@@ -22,8 +22,9 @@
   inmenu   : no 
 
 - Rooms:
-  - url      : room101.html
-    title    : Room 101
+  - permalink : pretty
+    title    : blogging like a hacker
+    date : 04/22/2012
     source   : room101.txt
 
   - url      : room203.html
