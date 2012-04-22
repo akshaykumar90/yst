@@ -46,11 +46,19 @@ parseAsDate s =
    where parsetimeWith = parseTime defaultTimeLocale
          formats = ["%x","%m/%d/%Y", "%D","%F", "%d %b %Y"]
 
+sanitizeTitle :: String -> String
+sanitizeTitle = intercalate "-" . removeWhitespaces . filter (`elem` safeChars)
+  where safeChars = ' ':['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9'] --space and alphanumeric
+        removeWhitespaces "" = []
+        removeWhitespaces str = first : removeWhitespaces (dropWhile (==' ') second)
+          where (first,second) = span (/=' ') str
+
 constructPermalink :: (FormatTime t) => String -> String -> t -> String
 constructPermalink style title date = case style of
-                                        "date" -> (formatTime defaultTimeLocale "%Y/%m/%d/" date) ++ title ++ ".html"
-                                        "pretty" -> (formatTime defaultTimeLocale "%Y/%m/%d/" date) ++ title ++ "/index.html"
+                                        "date" -> (formatTime defaultTimeLocale "%Y/%m/%d/" date) ++ safeTitle ++ ".html"
+                                        "pretty" -> (formatTime defaultTimeLocale "%Y/%m/%d/" date) ++ safeTitle ++ "/index.html"
                                         _ -> error "Unsupported permalink style"
+                                      where safeTitle = sanitizeTitle title
 
 stripStExt :: FilePath -> FilePath
 stripStExt f =
