@@ -33,7 +33,7 @@ import System.Directory
 import Control.Monad
 import Data.Time
 import Data.List (intercalate)
-import Data.Char (isSpace)
+import Data.Char (isSpace, toLower)
 import System.Locale (defaultTimeLocale)
 
 -- | Strip blank lines from a file.
@@ -47,7 +47,7 @@ parseAsDate s =
          formats = ["%x","%m/%d/%Y", "%D","%F", "%d %b %Y"]
 
 sanitizeTitle :: String -> String
-sanitizeTitle = intercalate "-" . removeWhitespaces . filter (`elem` safeChars)
+sanitizeTitle = map toLower . intercalate "-" . removeWhitespaces . filter (`elem` safeChars)
   where safeChars = ' ':['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9'] --space and alphanumeric
         removeWhitespaces "" = []
         removeWhitespaces str = first : removeWhitespaces (dropWhile (==' ') second)
